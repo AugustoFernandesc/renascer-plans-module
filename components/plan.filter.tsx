@@ -1,21 +1,18 @@
 import MDButton from "@components/MDButton";
+import SelectAutoComp from "@components/utils/SelectAutoComplete";
 import { useMaterialUIController } from "@context/index";
-import { Grid, TextField } from "@mui/material";
+import { FormControl, Grid, TextField } from "@mui/material";
 import { t } from "i18next";
 
-
-
-interface FilterProps{
-    valueFieldFilter:string;
-    setValueFieldFilter: (e:string) => void;
+interface FilterProps {
+    valueFieldFilter: string;
+    setValueFieldFilter: (e: any) => void;
     searchFilter: () => void;
     clearSearch: () => void;
-    onEnter: (e:any) => void;
+    onEnter: (e: any) => void;
 }
 
-
 export function PlanFilter(props: FilterProps){
-
 
     const [controller] = useMaterialUIController();
     const {sidenavColor} = controller;

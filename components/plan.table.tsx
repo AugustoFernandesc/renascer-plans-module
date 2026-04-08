@@ -7,33 +7,54 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    TableSortLabel,
+    Skeleton,
 } from '@mui/material';
+import { ITableProps } from '@types_main/itable.props';
 import { iconSize } from 'assets/theme/iconSize';
 import { t } from 'i18next';
+import { PlanResponse } from '../services/responses/plan.response';
 
-interface PlanTableProps{
-    data:any;
-    editAction:(id:string) => void;
-}
-
-export function PlanTable({data, editAction}: PlanTableProps){
+export function PlanTable(props: ITableProps<PlanResponse>){
+    const{data, editAction, orderDirection, handleOrderList} = props;
     
     if(!data){
-        return<div>Carregando...</div>
+        return(
+            <TableContainer sx={{marginTop: '15px'}}>
+                <Table>
+                    <TableBody>
+                        {Array.from({length: 5}).map((_, index) =>(
+                            <TableRow key={index}>
+                                <TableCell><Skeleton variant='text' /></TableCell>
+                                <TableCell><Skeleton variant='text' /></TableCell>
+                                <TableCell><Skeleton variant='text' /></TableCell>
+                                <TableCell><Skeleton variant='circular' width={24} height={24} /></TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        )
     }
-
 
     return(
         <Grid>
-            <TableContainer sx={{marginTop: '15px', maxHeigh: '60vh', overflowY: 'auto' }}>
+            <TableContainer sx={{marginTop: '15px', maxHeight: '60vh', overflowY: 'auto' }}>
 
                 <Table size='medium' stickyHeader>
                     <TableHead sx={{position: 'sticky', top:0}}>
                         <TableRow>
-                            <TableCell width='25%' sx={{ backgroundColor: 'background.paper', zIndex: 1 }}>{t('plansScreen.plano')}</TableCell>
-                            <TableCell width='25%' sx={{ backgroundColor: 'background.paper', zIndex: 1 }}>{t('plansScreen.valor')}</TableCell>
-                            <TableCell width='25%' sx={{ backgroundColor: 'background.paper', zIndex: 1 }}>{t('plansScreen.descricao')}</TableCell>
-                            <TableCell width='10%' align='center' sx={{ backgroundColor: 'background.paper', zIndex: 1 }}>{t('plansScreen.acoes')}</TableCell>
+                            <TableCell width='25%' sx={{ backgroundColor: 'background.paper', zIndex: 1 }}>
+                            {t('plans.plano')}
+                              <TableSortLabel
+                                active={true}
+                                direction={orderDirection}
+                                onClick={handleOrderList}>
+                            </TableSortLabel>    
+                            </TableCell>
+                            <TableCell width='25%' sx={{ backgroundColor: 'background.paper', zIndex: 1 }}>{t('plans.valor')}</TableCell>
+                            <TableCell width='25%' sx={{ backgroundColor: 'background.paper', zIndex: 1 }}>{t('plans.descricao')}</TableCell>
+                            <TableCell width='10%' align='center' sx={{ backgroundColor: 'background.paper', zIndex: 1 }}>{t('plans.acoes')}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

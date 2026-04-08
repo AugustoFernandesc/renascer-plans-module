@@ -28,10 +28,7 @@ export class PlanService extends BaseService implements IService<PlanResponse> {
         return this.post(body);
     }
       
-     public async getAll(
-        filter?: string,
-        params?: PagedParams
-    ): Promise<AxiosResponse<PagedResponse<PlanResponse>>> {
+     public async getAll(filter?: string, params?: PagedParams): Promise<AxiosResponse<PagedResponse<PlanResponse>>> {
         return await this.get(`payment-books/paginated${filter || ''}`, params);
     }
 

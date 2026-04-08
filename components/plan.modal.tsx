@@ -15,63 +15,128 @@ import { setLoading, useMaterialUIController } from '@context/index';
 import { useAlert } from '@components/showAlert/useAlertHook';
 import { PlanService } from '../services/plan.service';
 import { useEffect } from 'react';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PlanBody } from '../services/requests/plan.request';
+import { IModalProps } from '@types_main/imodal.props';
+import { PlanResponse } from '../services/responses/plan.response';
 
-
-interface PlanModalProps{
-    open:boolean;
-    handleModal: () => void;
-    edit?: any
-    refreshList: () => void;
-}
-
-export const PlanModal = ({open, handleModal, edit, refreshList} : PlanModalProps) => {
+export const PlanModal = ({open, handleModal, edit, getAll, clearSearch} : IModalProps<PlanResponse>) => {
     const {t} = useTranslation();
     const [controller, dispatch] = useMaterialUIController();
     const {alert: showAlert} = useAlert();
     const planService = new PlanService();
 
-    const createPlanForm = useForm({
-        defaultValues: {
-            title: '',
-            value: '',
-            description: ''
-        }
+    const createPlanFormSchema = z.object({
+        id: z.string().nullable().optional(),
+        title: z.string().min(1, t('plans.nomeObrigatorio')),
+        value: z.coerce.number().min(0.01, t('plans.valorObrigatorio')),
+        description: z.string().optional().nullable()
+    })
+
+    const clear:any = {
+        id: '',
+        title: '',
+        value: '',
+        description: ''
+    }
+
+
+    type CreatePlanFrom = z.infer<typeof createPlanFormSchema>
+
+    const methods = useForm<CreatePlanFrom>({
+        resolver: zodResolver(createPlanFormSchema),
+        defaultValues: clear
     });
 
-    const {handleSubmit, reset} = createPlanForm;
+    const {handleSubmit, reset, formState: {errors}} = methods;
+    
 
     useEffect(() => {
         if(edit && open){
             reset(edit);
         }
         else{
-            reset({title: '', value: '', description: ''});
+            reset(clear);
         }
     }, [edit, open, reset])
 
-    async function saveChanges(data:any){
+    useEffect(() => {
+        if(Object.keys(errors).length > 0){
+            showAlert(t('plans.envioErro'), 'error', 2500)
+        }
+    }, [errors]);
+
+
+    async function createPlan(data: PlanBody) {
         setLoading(dispatch, true);
 
-        try{
-            if(edit?.id){
-                await planService.update(edit.id, data);
-                showAlert('Plano atualizado com sucesso!', 'success', 2500);
-            }
-            else{
-                await planService.create(data);
-                showAlert('Plano criado com sucesso!', 'success', 2500);
-            }
-
-            refreshList();
+        await planService
+        .create(data)
+        .then((res) => {
+            clearSearch();
             handleModal();
-        }catch(err){
-            showAlert('Erro ao salvar plano. Verifique os dados', 'error', 3000);
-            console.error(err);
-        }
-        finally{
+            reset();
+            showAlert('Plano criado com sucesso!', 'success', 2500);
+        })
+        .catch((err) =>{
+            console.error("Erro ao criar plano: ", err);
+            showAlert('Houve um problema ao criar o Plano.', 'error', 3000);
+        })
+        .finally(() => {
             setLoading(dispatch, false);
-        }
+        })
     }
+
+    async function updatePlan(id: string, data: PlanBody) {
+        setLoading(dispatch, true);
+
+        await planService
+        .update(id, data)
+        .then(() => {
+            getAll();
+            clearSearch();
+            handleModal();
+            reset();
+            showAlert('Plano atualizado com sucesso!', 'success', 2500);
+        })
+        .catch((err) =>{
+            console.error("Erro ao atualizar plano: ", err);
+            showAlert('Houve um problema ao atualizar o Plano.', 'error', 3000);
+        })
+        .finally(() => {
+            setLoading(dispatch, false);
+        })
+    }
+
+    async function saveChanges(data: PlanBody) {
+        edit ? await updatePlan(edit.id, data) : await createPlan(data);
+    }
+
+
+    // async function createPlan(data:any){
+    //     setLoading(dispatch, true);
+
+    //     try{
+    //         if(edit?.id){
+    //             await planService.update(edit.id, data);
+    //             showAlert('Plano atualizado com sucesso!', 'success', 2500);
+    //         }
+    //         else{
+    //             await planService.create(data);
+    //             showAlert('Plano criado com sucesso!', 'success', 2500);
+    //         }
+
+    //         refreshList();
+    //         handleModal();
+    //     }catch(err){
+    //         showAlert('Erro ao salvar plano. Verifique os dados', 'error', 3000);
+    //         console.error(err);
+    //     }
+    //     finally{
+    //         setLoading(dispatch, false);
+    //     }
+    // }
 
 
 return(
@@ -79,7 +144,7 @@ return(
     <Dialog open={open} onClose={handleModal} fullWidth maxWidth="md" scroll ="paper">
         <DialogTitle> {edit ? "Editar Plano" : "Adicionar Plano"} </DialogTitle>
 
-        <FormProvider {...createPlanForm}>
+        <FormProvider {...methods}>
         <form onSubmit={handleSubmit(saveChanges)}>
         <DialogContent style={{minHeight: '300px'}}>
             <Grid container spacing={2} sx={{mt: 1}}>
@@ -89,6 +154,7 @@ return(
                             Nome do Plano <Form.MandatoryIcon/>
                         </Form.Label>
                         <Form.Input name='title' type='text' placeholder='Ex: Plano Familiar'/>
+                        <Form.ErrorMessage field='title'/>
                     </FormControl>
                 </Grid>
 
@@ -98,6 +164,7 @@ return(
                             Valor <Form.MandatoryIcon/>
                         </Form.Label>
                         <Form.Input name='value' type='number' placeholder='R$ 0,00'/>
+                        <Form.ErrorMessage field='value' />
                     </FormControl>
                 </Grid>
 
