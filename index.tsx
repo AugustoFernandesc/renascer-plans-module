@@ -10,7 +10,7 @@ import { PlanModal } from './components/plan.modal';
 import { PlanTable } from './components/plan.table';
 import { PlanHook } from './hooks/plans.hook';
 import { PlanService } from './services/plan.service';
-import { Combo } from '@types_main/combo';
+
 
 
 export const Plans = () => {
@@ -18,7 +18,7 @@ export const Plans = () => {
     const [controller] = useMaterialUIController();
     const {sidenavColor} = controller;
 
-    const planSerivce = new PlanService;
+    const planService = new PlanService;
     const [totais, setTotais] = useState<number>(0)
 
     //busca
@@ -43,22 +43,23 @@ export const Plans = () => {
         orderDirection,
         filter: filterFinal,
         refresh,
-        service: planSerivce
+        service: planService
     }).getJson();
 
     async function handleEditAction(id: string){
         try{
-            const response = await planSerivce.getById(id);
+            const response = await planService.getById(id);
             setPlanEdit(response.data.data);
             setOpen(true);
         }catch(err){
-            console.error('Eerro ao buscar plano para edição:', err);
+            console.error('Erro ao buscar plano para edição:', err);
         }
 
     }
 
 
-    async function getAll() {
+    async function getPlan(filter: string = '') {
+        setFilterFinal(filter);
         setRefresh((prev) => !prev)
     }
 
@@ -66,13 +67,14 @@ export const Plans = () => {
         const filter = valueFieldFilter ? `?title=${valueFieldFilter}` : '';
         setFilterFinal(filter);
         setPage(0)
-        setRefresh(!refresh);
+        setRefresh(prev => !prev); 
     }
+
     function clearSearch(){
         setValueFieldFilter('');
         setFilterFinal('');
         setPage(0);
-        setRefresh(!refresh)
+        getPlan();
     }
 
     function handleOrderList(){
@@ -129,7 +131,7 @@ export const Plans = () => {
                 handleModal={handleModal}
                 edit={planEdit}
                 clearSearch={clearSearch}
-                getAll={getAll}
+                getAll={getPlan}
             />
 
             <Paper sx={{ width: '100%', overflow: 'hidden', mt: 2 }}>

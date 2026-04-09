@@ -25,10 +25,10 @@ export function PlanTable(props: ITableProps<PlanResponse>){
                     <TableBody>
                         {Array.from({length: 5}).map((_, index) =>(
                             <TableRow key={index}>
-                                <TableCell><Skeleton variant='text' /></TableCell>
-                                <TableCell><Skeleton variant='text' /></TableCell>
-                                <TableCell><Skeleton variant='text' /></TableCell>
-                                <TableCell><Skeleton variant='circular' width={24} height={24} /></TableCell>
+                                <TableCell><Skeleton variant='rectangular' height={30}/></TableCell>
+                                <TableCell><Skeleton variant='rectangular' height={30}/></TableCell>
+                                <TableCell><Skeleton variant='rectangular' height={30}/></TableCell>
+                                <TableCell><Skeleton variant='rectangular' height={30}/></TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

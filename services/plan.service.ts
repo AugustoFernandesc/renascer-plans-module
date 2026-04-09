@@ -15,11 +15,8 @@ export class PlanService extends BaseService implements IService<PlanResponse> {
         if(this.resource == 1){
             return 'payment-books';
         }
-        else if (this.resource == 3){
-            return 'document-types'
-        }
         else{
-            return '';
+            return 'payment-books/paginated';
         }
     }
 
@@ -29,7 +26,8 @@ export class PlanService extends BaseService implements IService<PlanResponse> {
     }
       
      public async getAll(filter?: string, params?: PagedParams): Promise<AxiosResponse<PagedResponse<PlanResponse>>> {
-        return await this.get(`payment-books/paginated${filter || ''}`, params);
+        this.resource = 2;
+        return await this.get(filter?? '', params);
     }
 
     public async getById(id: string): Promise<AxiosResponse<{ data: PlanResponse; }, any, {}>> {
@@ -40,11 +38,6 @@ export class PlanService extends BaseService implements IService<PlanResponse> {
     public async update(id: string, body: PlanBody): Promise<AxiosResponse<PlanResponse, any, {}>> {
         this.resource = 1;
         return await this.put(`${id}`, body);
-    }
-
-    public async delete(id: string): Promise<AxiosResponse<void>> {
-        this.resource = 1;
-        return this.delete(`${id}`);
     }
 
     public async deleteById(id: string): Promise<AxiosResponse<any>> {

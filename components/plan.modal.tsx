@@ -3,6 +3,7 @@ import {
     DialogActions,
     FormControl,
     Grid,
+    TextField
 } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -10,7 +11,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { useTranslation } from 'react-i18next';
 import { Form } from '@components/Form';
 import MDButton from '@components/MDButton';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { setLoading, useMaterialUIController } from '@context/index';
 import { useAlert } from '@components/showAlert/useAlertHook';
 import { PlanService } from '../services/plan.service';
@@ -20,6 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { PlanBody } from '../services/requests/plan.request';
 import { IModalProps } from '@types_main/imodal.props';
 import { PlanResponse } from '../services/responses/plan.response';
+import { NumericFormat } from 'react-number-format';
 
 export const PlanModal = ({open, handleModal, edit, getAll, clearSearch} : IModalProps<PlanResponse>) => {
     const {t} = useTranslation();
@@ -77,11 +79,11 @@ export const PlanModal = ({open, handleModal, edit, getAll, clearSearch} : IModa
             clearSearch();
             handleModal();
             reset();
-            showAlert('Plano criado com sucesso!', 'success', 2500);
+            showAlert(t('plans.envioSucesso'), 'success', 2500);
         })
         .catch((err) =>{
             console.error("Erro ao criar plano: ", err);
-            showAlert('Houve um problema ao criar o Plano.', 'error', 3000);
+            showAlert(t('plans.envioErro'), 'error', 3000);
         })
         .finally(() => {
             setLoading(dispatch, false);
@@ -98,11 +100,11 @@ export const PlanModal = ({open, handleModal, edit, getAll, clearSearch} : IModa
             clearSearch();
             handleModal();
             reset();
-            showAlert('Plano atualizado com sucesso!', 'success', 2500);
+            showAlert(t('plans.edicaoSucesso'), 'success', 2500);
         })
         .catch((err) =>{
             console.error("Erro ao atualizar plano: ", err);
-            showAlert('Houve um problema ao atualizar o Plano.', 'error', 3000);
+            showAlert(t('plans.edicaoErro'), 'error', 3000);
         })
         .finally(() => {
             setLoading(dispatch, false);
@@ -142,7 +144,7 @@ export const PlanModal = ({open, handleModal, edit, getAll, clearSearch} : IModa
 return(
 
     <Dialog open={open} onClose={handleModal} fullWidth maxWidth="md" scroll ="paper">
-        <DialogTitle> {edit ? "Editar Plano" : "Adicionar Plano"} </DialogTitle>
+        <DialogTitle> {edit ? t('general.editar') :  t('plans.adicionarPlano') } </DialogTitle>
 
         <FormProvider {...methods}>
         <form onSubmit={handleSubmit(saveChanges)}>
@@ -151,9 +153,9 @@ return(
                 <Grid size={{xs: 12}}>
                     <FormControl fullWidth>
                         <Form.Label>
-                            Nome do Plano <Form.MandatoryIcon/>
+                            {t('plans.plano')} <Form.MandatoryIcon/>
                         </Form.Label>
-                        <Form.Input name='title' type='text' placeholder='Ex: Plano Familiar'/>
+                        <Form.Input name='title' type='text' placeholder='Ex: Plano Familiar' error={!!errors.title}/>
                         <Form.ErrorMessage field='title'/>
                     </FormControl>
                 </Grid>
@@ -163,14 +165,38 @@ return(
                         <Form.Label>
                             Valor <Form.MandatoryIcon/>
                         </Form.Label>
-                        <Form.Input name='value' type='number' placeholder='R$ 0,00'/>
-                        <Form.ErrorMessage field='value' />
+                        <Controller
+                            name= 'value'
+                            control={methods.control}
+                            render={({field, fieldState}) =>(
+                                <NumericFormat
+                                    value={field.value}
+                                    onValueChange={(vals) =>{
+                                        field.onChange(vals.floatValue ?? 0)
+                                    }}
+                                    thousandSeparator='.'
+                                    decimalSeparator=','
+                                    decimalScale={2}
+                                    fixedDecimalScale
+                                    prefix='R$ '
+                                    allowNegative={false}
+                                    customInput={TextField}
+                                    fullWidth
+                                    size='medium'
+                                    autoComplete='off'
+                                    placeholder='R$ 0,00'
+                                    error={!!fieldState.error}
+                                />
+                            )}
+                        />
+                        
+                        <Form.ErrorMessage field="value" />
                     </FormControl>
                 </Grid>
 
                 <Grid size={{xs: 12}}>
                     <FormControl fullWidth>
-                        <Form.Label> Descrição </Form.Label>
+                        <Form.Label> {t('plans.descricao')} </Form.Label>
                         <Form.Input name='description' type='text' multiline rows={3} placeholder='Descreva os detalhes do plano...'/>
                     </FormControl>
                 </Grid>
@@ -184,7 +210,7 @@ return(
                 color='dark'
                 onClick={handleModal}
             >
-                CANCELAR
+                {t('plans.cancelar')}
 
             </MDButton>
             
@@ -193,7 +219,7 @@ return(
                 color='success'
                 type='submit'
             >
-                SALVAR
+                {t('plans.salvar')}
 
             </MDButton>
             </Box>

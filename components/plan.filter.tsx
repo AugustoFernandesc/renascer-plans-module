@@ -1,7 +1,6 @@
 import MDButton from "@components/MDButton";
-import SelectAutoComp from "@components/utils/SelectAutoComplete";
 import { useMaterialUIController } from "@context/index";
-import { FormControl, Grid, TextField } from "@mui/material";
+import { Grid, TextField } from "@mui/material";
 import { t } from "i18next";
 
 interface FilterProps {
@@ -24,7 +23,7 @@ export function PlanFilter(props: FilterProps){
                 <TextField
                     fullWidth
                     size="medium"
-                    placeholder="Plano"
+                    placeholder={t('plans.plano')}
                     value={props.valueFieldFilter}
                     onChange={(e) => props.setValueFieldFilter(e.target.value)}
                     onKeyDown={props.onEnter}
@@ -36,7 +35,7 @@ export function PlanFilter(props: FilterProps){
                     variant="gradient"
                     color={sidenavColor}
                     onClick={props.searchFilter}
-                    title="Filtrar Plano"
+                    title={t('plans.filtrarPlano')}
                 >
                     {t('general.buscar')}
 
@@ -46,7 +45,7 @@ export function PlanFilter(props: FilterProps){
                     variant="gradient"
                     color={sidenavColor}
                     onClick={props.clearSearch}
-                    title="Limpar Plano"
+                    title={t('plans.limparFiltro')}
                 >
                     {t('general.limpar')}
                     
